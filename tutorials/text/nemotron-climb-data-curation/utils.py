@@ -16,7 +16,7 @@ import argparse
 import os
 from pathlib import Path
 
-from nemo_curator.core.client import RayClient
+from nemo_curator.core.client import RayClient, SlurmRayClient
 from nemo_curator.core.constants import (
     DEFAULT_RAY_CLIENT_SERVER_PORT,
     DEFAULT_RAY_DASHBOARD_HOST,
@@ -58,6 +58,21 @@ def create_ray_client(args: argparse.Namespace) -> RayClient:
         metrics_dir=args.metrics_dir,
     )
 
+def create_slurm_ray_client(args: argparse.Namespace) -> SlurmRayClient:
+    return SlurmRayClient(
+        ray_port=args.ray_port,
+        ray_dashboard_port=args.ray_dashboard_port,
+        ray_client_server_port=args.ray_client_server_port,
+        ray_temp_dir=args.ray_temp_dir,
+        include_dashboard=args.include_dashboard,
+        ray_metrics_port=args.ray_metrics_port,
+        ray_dashboard_host=args.ray_dashboard_host,
+        num_cpus=args.num_cpus,
+        num_gpus=args.num_gpus,
+        enable_object_spilling=args.enable_object_spilling,
+        ray_stdouterr_capture_file=args.ray_stdouterr_capture_file,
+        metrics_dir=args.metrics_dir,
+    )
 
 def centroid_id(path: str) -> int | None:
     """Return the integer N from a `centroid=N` basename, or None if the path doesn't match the convention."""

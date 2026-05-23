@@ -14,8 +14,9 @@
 
 import argparse
 import json
+import os
 
-from utils import attach_ray_client_args, create_ray_client
+from utils import attach_ray_client_args, create_slurm_ray_client,create_ray_client
 
 from nemo_curator.pipeline import Pipeline
 from nemo_curator.stages.text.embedders.base import EmbeddingCreatorStage
@@ -25,10 +26,10 @@ from nemo_curator.stages.text.modules.add_id import AddId
 
 _EMBEDDING_MODEL = "NovaSearch/stella_en_400M_v5"
 _EMBEDDING_MODEL_MAX_SEQ_LENGTH = 512
-
+os.environ["HF_HUB_OFFLINE"] = "1"
 
 def main(args: argparse.Namespace) -> None:
-    ray_client = create_ray_client(args)
+    ray_client = create_slurm_ray_client(args) if os.environ.get("SLURM_JOB_ID") else create_ray_client(args)
     ray_client.start()
 
     if args.input_filetype == "jsonl":
