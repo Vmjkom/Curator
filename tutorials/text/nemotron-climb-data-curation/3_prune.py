@@ -26,7 +26,7 @@ import numpy as np
 import ray
 from loguru import logger
 from scipy.cluster.hierarchy import fcluster, linkage
-from utils import attach_ray_client_args, centroid_id, create_ray_client, list_centroid_dirs
+from utils import attach_ray_client_args, centroid_id, create_ray_client, list_centroid_dirs, create_slurm_ray_client
 
 import nemo_curator.stages.text.io.writer.utils as writer_utils
 from nemo_curator.pipeline.pipeline import Pipeline
@@ -170,7 +170,7 @@ def main(args: argparse.Namespace) -> None:  # noqa: C901, PLR0912
     for subdirectory in list_centroid_dirs(args.input_path):
         os.makedirs(os.path.join(args.output_path, os.path.basename(subdirectory)), exist_ok=True)
 
-    ray_client = create_ray_client(args)
+    ray_client = create_slurm_ray_client(args) if os.environ.get("SLURM_JOB_ID") else create_ray_client(args)
     ray_client.start()
 
     if args.input_filetype == "jsonl":

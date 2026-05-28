@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import argparse
+import os
 
-from utils import attach_ray_client_args, create_ray_client
+from utils import attach_ray_client_args, create_slurm_ray_client,create_ray_client
 
 from nemo_curator.backends.ray_actor_pool import RayActorPoolExecutor
 from nemo_curator.pipeline import Pipeline
@@ -22,8 +23,9 @@ from nemo_curator.stages.deduplication.semantic.kmeans import KMeansStage
 
 
 def main(args: argparse.Namespace) -> None:
-    ray_client = create_ray_client(args)
+    ray_client = create_slurm_ray_client(args) if os.environ.get("SLURM_JOB_ID") else create_ray_client(args)
     ray_client.start()
+
 
     kmeans_executor = RayActorPoolExecutor()
     pipeline = Pipeline(name="2_cluster")

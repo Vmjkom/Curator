@@ -17,7 +17,7 @@ import json
 import os
 import shutil
 
-from utils import attach_ray_client_args, centroid_id, create_ray_client, list_centroid_dirs
+from utils import attach_ray_client_args, centroid_id, create_ray_client, list_centroid_dirs,create_slurm_ray_client
 
 from nemo_curator.pipeline import Pipeline
 from nemo_curator.stages.text.io.reader import JsonlReader, ParquetReader
@@ -26,7 +26,7 @@ from nemo_curator.utils.merge_file_prefixes import merge_file_prefixes
 
 
 def main(args: argparse.Namespace) -> None:
-    ray_client = create_ray_client(args)
+    ray_client = create_slurm_ray_client(args) if os.environ.get("SLURM_JOB_ID") else create_ray_client(args)
     ray_client.start()
 
     if args.input_filetype == "jsonl":
