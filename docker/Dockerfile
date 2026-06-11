@@ -81,8 +81,12 @@ ENV RAY_SERVE_HAPROXY_BINARY_PATH=/usr/local/bin/haproxy
 
 FROM nemo_curator_dep AS nemo_curator
 
-ARG CURATOR_EXTRA=all
+# Default to the text CUDA12 extra used by the Nemotron-CLIMB tutorial.
+# Allow overriding via --build-arg CURATOR_EXTRA=...
+ARG CURATOR_EXTRA=text_cuda12
 ARG CURATOR_GROUPS="--all-groups"
+# Toggle installation of tutorial packages (xformers, lm-eval, Megatron-LM clone, etc.)
+ARG ENABLE_TUTORIAL_PACKAGES=1
 WORKDIR /opt/Curator
 
 # Selective file copying before dependency installation for better layer caching
@@ -144,3 +148,22 @@ ENV NVIDIA_BUILD_ID=${NVIDIA_BUILD_ID:-<unknown>}
 LABEL com.nvidia.build.id="${NVIDIA_BUILD_ID}"
 ARG NVIDIA_BUILD_REF
 LABEL com.nvidia.build.ref="${NVIDIA_BUILD_REF}"
+
+# Optional: install tutorial-specific system and Python packages used by
+# the Nemotron-CLIMB tutorial (xformers, lm-eval, lightgbm, Megatron-LM).
+# Controlled via `--build-arg ENABLE_TUTORIAL_PACKAGES=1|0`.
+RUN if [ "${ENABLE_TUTORIAL_PACKAGES}" = "1" ]; then \
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        libsndfile1 \
+        pkg-config && \
+    rm -rf /var/lib/apt/lists/* && \
+    /opt/venv/bin/python -m pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /opt/venv/bin/python -m pip install --no-cache-dir xformers lightgbm sentencepiece tokenizers && \
+    git clone --depth 1 https://github.com/EleutherAI/lm-evaluation-harness.git /opt/lm-eval && \
+    /opt/venv/bin/pip install --no-cache-dir -e /opt/lm-eval && \
+    git clone --depth 1 https://github.com/NVIDIA/Megatron-LM.git /opt/Megatron-LM || true; \
+  else \
+    echo "Skipping tutorial-specific package installation"; \
+  fi

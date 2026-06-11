@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-CONTAINER="/leonardo_work/OELLM_prod2026/container_images/nemo_curator_26.04.sif"
+CONTAINER="/leonardo_work/OELLM_prod2026/container_images/nemo_curator_CLIMB_26.04.sif"
 export SINGULARITY_BINDPATH="/leonardo_work/OELLM_Catalog,/leonardo_work/OELLM_prod2026,${SCRATCH},${FAST}"
 
 VENV_PATH="/leonardo_work/OELLM_prod2026/users/vkomulai/Curator/.venv"
@@ -43,7 +43,6 @@ srun singularity exec --nv \
       --id-field _curator_climb_id \
       --use-sentence-transformer \
       --output-filetype parquet \
-      --include-dashboard \
       --metrics-dir $OUTPUT_DIR/metrics \
       --num-gpus 2 \
       --num-cpus 32 \
